@@ -599,7 +599,9 @@ app.route('/api', api);
 
 const CLIENT = './dist/client';
 app.use('/assets/*', serveStatic({ root: CLIENT }));
+app.use('/brand/*', serveStatic({ root: CLIENT }));
 app.get('/manifest.webmanifest', serveStatic({ path: `${CLIENT}/manifest.webmanifest` }));
+app.get('/favicon.ico', serveStatic({ path: `${CLIENT}/brand/quacked-logo.jpg` }));
 const indexPath = `${CLIENT}/index.html`;
 const shell = existsSync(indexPath) ? readFileSync(indexPath, 'utf8') : '<h1>Run npm run build</h1>';
 app.get('*', (c) => c.html(shell));
