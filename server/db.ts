@@ -136,24 +136,24 @@ export async function migrate() {
     );
 
     create index if not exists users_team_idx on users(team_id);
-    create index if not exists day_logs_day_idx on day_logs(day);
-    create index if not exists day_logs_user_day_idx on day_logs(user_id, day desc);
-    create index if not exists teams_agency_idx on teams(agency_id);
-  `);
+        create index if not exists day_logs_day_idx on day_logs(day);
+        create index if not exists day_logs_user_day_idx on day_logs(user_id, day desc);
+      `);
 
-  /* legacy teams may lack agency_id */
-  await pool.query(`
-    do $$ begin
-      if not exists (
-        select 1 from information_schema.columns
-        where table_name = 'teams' and column_name = 'agency_id'
-      ) then
-        alter table teams add column agency_id uuid references agencies(id) on delete set null;
-      end if;
-    end $$;
-  `);
+      /* legacy teams may lack agency_id — must run before any agency_id index */
+      await pool.query(`
+        do $$ begin
+          if not exists (
+            select 1 from information_schema.columns
+            where table_schema = 'public' and table_name = 'teams' and column_name = 'agency_id'
+          ) then
+            alter table teams add column agency_id uuid references agencies(id) on delete set null;
+          end if;
+        end $$;
+      `);
+      await pool.query(`create index if not exists teams_agency_idx on teams(agency_id)`);
 
-  const [agency] = await q<any>(
+      const [agency] = await q<any>(
     `insert into agencies (slug, name, logo, brand)
      values ('quacked-dialer', 'QuackedDialer', '/brand/quacked-logo.jpg', $1::jsonb)
      on conflict (slug) do update set
