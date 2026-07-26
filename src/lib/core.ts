@@ -49,11 +49,11 @@ export function applyBrand(brand?: Brand | null) {
   root.style.setProperty('--em', b.accent || '#10d488');
   root.style.setProperty('--em2', b.accent ? lighten(b.accent, 0.2) : '#5cf0b8');
   root.style.setProperty('--bg', b.bg || '#05070a');
-  document.title = b.appName || 'Zippy CRM';
+  document.title = b.appName || 'QuackedDialer';
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', b.bg || '#05070a');
   const apple = document.querySelector('meta[name="apple-mobile-web-app-title"]');
-  if (apple) apple.setAttribute('content', b.appName || 'Zippy CRM');
+  if (apple) apple.setAttribute('content', b.appName || 'QuackedDialer');
 }
 
 function lighten(hex: string, amt: number) {

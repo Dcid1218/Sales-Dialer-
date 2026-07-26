@@ -31,9 +31,9 @@ export default function Welcome({ onAuthed }: { onAuthed: (u: User) => void }) {
       <div className="bgfx"><div className="blob g" /><div className="blob e" /><div className="grain" /></div>
       <div className="welcome-card">
         <div className="welcome-mark">
-          <span className="mk">ZC</span>
+          <span className="mk">QD</span>
           <div>
-            <div className="wm">Zippy CRM</div>
+            <div className="wm">QuackedDialer</div>
             <div className="tag">Sales Performance OS</div>
           </div>
         </div>

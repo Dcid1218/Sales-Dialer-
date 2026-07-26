@@ -70,7 +70,7 @@ export default function Admin({ store }: { store: Store }) {
                 name: name.trim(),
                 brand: {
                   appName: name.trim(),
-                  tagline: 'Powered by Zippy CRM',
+                  tagline: 'Powered by QuackedDialer',
                   primary, accent,
                   logoText: name.trim().slice(0, 2).toUpperCase(),
                   theme: 'dark',

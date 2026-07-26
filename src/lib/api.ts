@@ -8,7 +8,7 @@ async function raw(method: string, path: string, body?: any) {
     credentials: 'same-origin',
   });
   if (res.status === 401) {
-    window.dispatchEvent(new CustomEvent('zippy:locked'));
+    window.dispatchEvent(new CustomEvent('quacked:locked'));
     throw new Error('locked');
   }
   if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `${method} ${path} failed`);

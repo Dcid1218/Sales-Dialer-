@@ -145,8 +145,8 @@ export default function Profile({ store }: { store: Store }) {
             style={{ marginBottom: 10 }}
             onClick={() => {
               try {
-                const days = localStorage.getItem('ascend_days') || localStorage.getItem('zippy_days');
-                const settingsRaw = localStorage.getItem('ascend_settings') || localStorage.getItem('zippy_settings');
+                const days = localStorage.getItem('ascend_days') || localStorage.getItem('quacked_days');
+                const settingsRaw = localStorage.getItem('ascend_settings') || localStorage.getItem('quacked_settings');
                 if (!days) return say('No local dialer data found in this browser.');
                 setImportText(JSON.stringify({
                   days: JSON.parse(days),

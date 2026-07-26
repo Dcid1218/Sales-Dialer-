@@ -1,4 +1,4 @@
-# Zippy CRM
+# QuackedDialer
 
 Multi-user sales performance OS for life insurance teams. White-labels to the agent's selected team.
 
@@ -8,7 +8,7 @@ Multi-user sales performance OS for life insurance teams. White-labels to the ag
 - Railway deploy
 
 ## Branding
-- Platform: **Zippy CRM**
+- Platform: **QuackedDialer**
 - After team select: header/splash chrome uses **team name** + team colors
 - Seeded teams: **WOLFPACK DIRECT**, **YN's**
 

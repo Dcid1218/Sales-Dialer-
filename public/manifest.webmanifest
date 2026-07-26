@@ -1,6 +1,6 @@
 {
-  "name": "Zippy CRM",
-  "short_name": "Zippy",
+  "name": "QuackedDialer",
+  "short_name": "Quacked",
   "description": "Sales performance OS for life insurance dialers.",
   "start_url": "/",
   "display": "standalone",

@@ -4,7 +4,7 @@ import { getCookie, setCookie, deleteCookie } from 'hono/cookie';
 import { q, q1 } from './db.ts';
 
 const SECRET = process.env.SESSION_SECRET || randomBytes(32).toString('hex');
-const COOKIE = 'zippy_session';
+const COOKIE = 'quacked_session';
 const MAX_AGE = 60 * 60 * 24 * 180;
 
 if (!process.env.SESSION_SECRET) {
