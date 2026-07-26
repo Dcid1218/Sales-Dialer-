@@ -599,9 +599,32 @@ app.route('/api', api);
 
 const CLIENT = './dist/client';
 app.use('/assets/*', serveStatic({ root: CLIENT }));
-app.use('/brand/*', serveStatic({ root: CLIENT }));
+app.get('/brand/*', async (c) => {
+  const rel = c.req.path.replace(/^\/brand\//, '').replace(/\.\./g, '');
+  const file = `${CLIENT}/brand/${rel}`;
+  if (!existsSync(file)) return c.notFound();
+  const buf = readFileSync(file);
+  const ext = rel.split('.').pop()?.toLowerCase();
+  const type =
+    ext === 'png' ? 'image/png' :
+    ext === 'webp' ? 'image/webp' :
+    ext === 'svg' ? 'image/svg+xml' :
+    'image/jpeg';
+  return new Response(buf, {
+    headers: {
+      'Content-Type': type,
+      'Cache-Control': 'public, max-age=86400',
+      'Content-Length': String(buf.byteLength),
+    },
+  });
+});
 app.get('/manifest.webmanifest', serveStatic({ path: `${CLIENT}/manifest.webmanifest` }));
-app.get('/favicon.ico', serveStatic({ path: `${CLIENT}/brand/quacked-logo.jpg` }));
+app.get('/favicon.ico', async (c) => {
+  const file = `${CLIENT}/brand/quacked-logo.jpg`;
+  if (!existsSync(file)) return c.notFound();
+  const buf = readFileSync(file);
+  return new Response(buf, { headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=86400' } });
+});
 const indexPath = `${CLIENT}/index.html`;
 const shell = existsSync(indexPath) ? readFileSync(indexPath, 'utf8') : '<h1>Run npm run build</h1>';
 app.get('*', (c) => c.html(shell));
