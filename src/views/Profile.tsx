@@ -49,7 +49,7 @@ export default function Profile({ store }: { store: Store }) {
           <div><b>CRM & auto-dialer</b><div className="tiny muted">Webhooks for sync and session start</div></div>
         </button>
         <button className="list-row btnish" onClick={() => setImportOpen(true)}>
-          <div><b>Import old local data</b><div className="tiny muted">Paste ASCEND localStorage JSON</div></div>
+          <div><b>Import old local data</b><div className="tiny muted">Paste prior dialer localStorage JSON</div></div>
         </button>
         <button
           className="list-row btnish"
@@ -138,16 +138,16 @@ export default function Profile({ store }: { store: Store }) {
       {importOpen && (
         <Sheet title="Import localStorage" onClose={() => setImportOpen(false)}>
           <p className="muted tiny" style={{ marginBottom: 12 }}>
-            Paste JSON shaped like <code>{`{"days":{...},"settings":{...}}`}</code> or the raw days map from the old ASCEND app.
+            Paste JSON shaped like <code>{`{"days":{...},"settings":{...}}`}</code> or the raw days map from the old dialer app.
           </p>
           <button
             className="btn quiet"
             style={{ marginBottom: 10 }}
             onClick={() => {
               try {
-                const days = localStorage.getItem('ascend_days');
-                const settingsRaw = localStorage.getItem('ascend_settings');
-                if (!days) return say('No ascend_days found in this browser.');
+                const days = localStorage.getItem('ascend_days') || localStorage.getItem('zippy_days');
+                const settingsRaw = localStorage.getItem('ascend_settings') || localStorage.getItem('zippy_settings');
+                if (!days) return say('No local dialer data found in this browser.');
                 setImportText(JSON.stringify({
                   days: JSON.parse(days),
                   settings: settingsRaw ? JSON.parse(settingsRaw) : undefined,

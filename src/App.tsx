@@ -80,8 +80,8 @@ export default function App() {
     const onLocked = () => {
       setUser(null); setDays({}); setGate('welcome');
     };
-    window.addEventListener('ascend:locked', onLocked);
-    return () => window.removeEventListener('ascend:locked', onLocked);
+    window.addEventListener('zippy:locked', onLocked);
+    return () => window.removeEventListener('zippy:locked', onLocked);
   }, [enter]);
 
   const bump = useCallback(async (k: keyof DayLog, delta: number) => {
@@ -147,9 +147,9 @@ export default function App() {
       <div className="app">
         <header>
           <div className="logo">
-            <div className="mk">{brand.logoText || 'AS'}</div>
+            <div className="mk">{brand.logoText || 'ZC'}</div>
             <div>
-              <div className="wm">{brand.appName || 'ASCEND'}</div>
+              <div className="wm">{brand.appName || user.team_name || 'Zippy CRM'}</div>
               <div className="tag">{brand.tagline || 'Sales Performance OS'}</div>
             </div>
           </div>

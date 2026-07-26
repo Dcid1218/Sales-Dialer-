@@ -1,6 +1,6 @@
 {
-  "name": "ASCEND",
-  "short_name": "ASCEND",
+  "name": "Zippy CRM",
+  "short_name": "Zippy",
   "description": "Sales performance OS for life insurance dialers.",
   "start_url": "/",
   "display": "standalone",

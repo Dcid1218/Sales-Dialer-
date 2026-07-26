@@ -31,14 +31,16 @@ export default function Welcome({ onAuthed }: { onAuthed: (u: User) => void }) {
       <div className="bgfx"><div className="blob g" /><div className="blob e" /><div className="grain" /></div>
       <div className="welcome-card">
         <div className="welcome-mark">
-          <span className="mk">AS</span>
+          <span className="mk">ZC</span>
           <div>
-            <div className="wm">ASCEND</div>
+            <div className="wm">Zippy CRM</div>
             <div className="tag">Sales Performance OS</div>
           </div>
         </div>
         <h1>{mode === 'login' ? 'Back on the phones.' : 'Build your book.'}</h1>
-        <p className="sub">Track dials, zones, and premium. Team white-label. Your numbers, your agency.</p>
+        <p className="sub">
+          Track dials, zones, and premium. Join your team and the whole app white-labels to them.
+        </p>
         <Segmented
           value={mode}
           onChange={setMode}

@@ -28,7 +28,7 @@ export async function q1<T = any>(text: string, params: any[] = []): Promise<T |
 const DEFAULT_BRANDS = {
   wolfpack: {
     appName: 'WOLFPACK DIRECT',
-    tagline: 'Sales Performance OS',
+    tagline: 'Powered by Zippy CRM',
     primary: '#f5c451',
     accent: '#10d488',
     logoText: 'WP',
@@ -37,7 +37,7 @@ const DEFAULT_BRANDS = {
   },
   yns: {
     appName: "YN's",
-    tagline: 'Dial. Close. Ascend.',
+    tagline: 'Powered by Zippy CRM',
     primary: '#7c8cf0',
     accent: '#22d3ee',
     logoText: 'YN',

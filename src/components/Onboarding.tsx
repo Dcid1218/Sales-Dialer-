@@ -93,7 +93,7 @@ export default function Onboarding({ user, onDone }: { user: User; onDone: (u: U
               </label>
             </div>
             <button className="btn primary wide" onClick={finish} disabled={busy}>
-              {busy ? 'Opening…' : 'Enter ASCEND'}
+              {busy ? 'Opening…' : 'Enter Zippy CRM'}
             </button>
           </>
         )}

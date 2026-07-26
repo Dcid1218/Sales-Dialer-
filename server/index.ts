@@ -445,7 +445,7 @@ api.post('/integrations/crm/sync', async (c) => {
   );
 
   const body = {
-    source: 'ascend',
+    source: 'zippy-crm',
     synced_at: new Date().toISOString(),
     agent: { id: user.id, email: user.email, name: user.name, team: user.team_name },
     settings: { annual: s.annual, comm: s.comm, workdays: s.workdays, dial_goal: s.dial_goal },
@@ -489,7 +489,7 @@ api.post('/integrations/dialer/start', async (c) => {
   }
 
   const payload = {
-    source: 'ascend',
+    source: 'zippy-crm',
     action: 'start_session',
     agent: { id: user.id, email: user.email, name: user.name },
     list_id: b.list_id || null,
@@ -544,7 +544,7 @@ app.get('*', (c) => c.html(shell));
 
 const port = Number(process.env.PORT || 8080);
 serve({ fetch: app.fetch, port, hostname: '0.0.0.0' }, (i) =>
-  console.log(`ascend listening on 0.0.0.0:${i.port}`),
+  console.log(`zippy-crm listening on 0.0.0.0:${i.port}`),
 );
 
 migrate()

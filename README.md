@@ -1,18 +1,16 @@
-# ASCEND Dialer
+# Zippy CRM
 
-Multi-user sales performance OS for life insurance teams.
+Multi-user sales performance OS for life insurance teams. White-labels to the agent's selected team.
 
 ## Stack
 - React + Vite frontend
 - Hono API + Postgres
 - Railway deploy
 
-## Teams
-Seeded:
-- **WOLFPACK DIRECT** (`wolfpack-direct`)
-- **YN's** (`yns`)
-
-Admins can create more teams.
+## Branding
+- Platform: **Zippy CRM**
+- After team select: header/splash chrome uses **team name** + team colors
+- Seeded teams: **WOLFPACK DIRECT**, **YN's**
 
 ## Roles
 - `agent` — personal tracker
@@ -29,10 +27,4 @@ npm run dev
 ```
 
 ## Railway
-1. New project + Postgres
-2. Service from this repo
-3. Variables: `DATABASE_URL=${{Postgres.DATABASE_URL}}`, `SESSION_SECRET`, optional `BOOTSTRAP_ADMIN_EMAIL`
-4. Deploy (`npm run build` + `npm start`)
-
-## GitHub Pages
-Disabled — app is server-backed and no longer static-only.
+Connected to `Dcid1218/Sales-Dialer-` main. Push deploys automatically.
