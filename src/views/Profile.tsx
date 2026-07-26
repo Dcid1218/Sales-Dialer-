@@ -35,7 +35,7 @@ export default function Profile({ store }: { store: Store }) {
               <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => setAvatar(e.target.files?.[0] ?? null)} />
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                  <BrandMark brand={user.team_brand || PLATFORM_BRAND} size={28} />
+                  <BrandMark brand={user.team_brand || PLATFORM_BRAND} variant="inline" />
                   <span className="tiny" style={{ color: 'var(--gold)', fontWeight: 700 }}>{user.team_name || 'QuackedDialer'}</span>
                 </div>
                 <h2>{user.name || 'Agent'}</h2>

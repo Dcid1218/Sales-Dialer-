@@ -620,7 +620,7 @@ app.get('/brand/*', async (c) => {
 });
 app.get('/manifest.webmanifest', serveStatic({ path: `${CLIENT}/manifest.webmanifest` }));
 app.get('/favicon.ico', async (c) => {
-  const file = `${CLIENT}/brand/quacked-logo.jpg`;
+  const file = `${CLIENT}/brand/quacked-mark.png`;
   if (!existsSync(file)) return c.notFound();
   const buf = readFileSync(file);
   return new Response(buf, { headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=86400' } });

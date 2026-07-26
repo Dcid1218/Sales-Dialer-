@@ -1,11 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../lib/api.ts';
 import type { User } from '../lib/core.ts';
 import { PLATFORM_BRAND } from '../lib/brand.ts';
 import { applyBrand } from '../lib/core.ts';
 import { BrandMark } from './BrandMark.tsx';
 import { Segmented } from './ui.tsx';
-import { useEffect } from 'react';
 
 export default function Welcome({ onAuthed }: { onAuthed: (u: User) => void }) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
@@ -34,11 +33,11 @@ export default function Welcome({ onAuthed }: { onAuthed: (u: User) => void }) {
 
   return (
     <div className="welcome">
-      <div className="bgfx golf"><div className="blob g" /><div className="blob e" /><div className="grain" /></div>
+      <div className="bgfx golf"><div className="blob g" /><div className="blob e" /></div>
       <div className="welcome-card">
-        <div className="welcome-mark">
-          <BrandMark size={64} brand={PLATFORM_BRAND} />
-          <div>
+        <div className="welcome-brand">
+          <BrandMark variant="hero" brand={PLATFORM_BRAND} />
+          <div className="welcome-brand-copy">
             <div className="wm">QuackedDialer</div>
             <div className="tag">Sales Performance OS</div>
           </div>
@@ -58,12 +57,12 @@ export default function Welcome({ onAuthed }: { onAuthed: (u: User) => void }) {
         {mode === 'register' && (
           <label className="field">
             <span>Name</span>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" autoComplete="name" />
           </label>
         )}
         <label className="field">
           <span>Email</span>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@agency.com" />
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@agency.com" autoComplete="email" inputMode="email" />
         </label>
         <label className="field">
           <span>Password</span>
@@ -72,6 +71,7 @@ export default function Welcome({ onAuthed }: { onAuthed: (u: User) => void }) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder={mode === 'register' ? 'At least 8 characters' : 'Password'}
+            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
             onKeyDown={(e) => e.key === 'Enter' && submit()}
           />
         </label>

@@ -1,5 +1,3 @@
-import type { Brand } from './core.ts';
-
 /** QuackedDialer master palette from mallard Q mark */
 export const QUACKED = {
   green: '#0B5C3B',
@@ -14,16 +12,16 @@ export const QUACKED = {
   ink: '#0A2F1F',
   muted: '#5C6F64',
   line: 'rgba(11, 92, 59, 0.14)',
-  logoUrl: '/brand/quacked-logo.jpg',
+  logoUrl: '/brand/quacked-mark.png',
 };
 
-export const PLATFORM_BRAND: Brand = {
+export const PLATFORM_BRAND = {
   appName: 'QuackedDialer',
   tagline: 'Sales Performance OS',
   primary: QUACKED.gold,
-  accent: QUACKED.greenMid,
+  accent: QUACKED.green,
   logoText: 'QD',
-  logoUrl: QUACKED.logoUrl,
+  logoUrl: '/brand/quacked-mark.png',
   theme: 'light',
   bg: QUACKED.cream,
 };

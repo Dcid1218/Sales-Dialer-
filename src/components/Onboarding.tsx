@@ -44,7 +44,7 @@ export default function Onboarding({ user, onDone }: { user: User; onDone: (u: U
       <div className="bgfx golf"><div className="blob g" /><div className="blob e" /><div className="grain" /></div>
       <div className="welcome-card onboard">
         <div className="welcome-mark" style={{ marginBottom: 12 }}>
-          <BrandMark size={48} brand={PLATFORM_BRAND} />
+          <BrandMark variant="tile" brand={PLATFORM_BRAND} />
           <div className="wm" style={{ fontSize: 18 }}>QuackedDialer</div>
         </div>
         <div className="steps">{[0, 1, 2].map((i) => <span key={i} className={i <= step ? 'on' : ''} />)}</div>
@@ -76,7 +76,7 @@ export default function Onboarding({ user, onDone }: { user: User; onDone: (u: U
                     ['--ta' as any]: t.brand?.accent || '#0B5C3B',
                   }}
                 >
-                  <BrandMark brand={t.brand} size={42} />
+                  <BrandMark brand={t.brand} variant="tile" />
                   <span>{t.name}</span>
                 </button>
               ))}

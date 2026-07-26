@@ -35,7 +35,7 @@ const DEFAULT_AGENCY = {
   primary: GOLD,
   accent: GREEN,
   logoText: 'QD',
-  logoUrl: '/brand/quacked-logo.jpg',
+  logoUrl: '/brand/quacked-mark.png',
   theme: 'light',
   bg: CREAM,
 };
@@ -155,7 +155,7 @@ export async function migrate() {
 
       const [agency] = await q<any>(
     `insert into agencies (slug, name, logo, brand)
-     values ('quacked-dialer', 'QuackedDialer', '/brand/quacked-logo.jpg', $1::jsonb)
+     values ('quacked-dialer', 'QuackedDialer', '/brand/quacked-mark.png', $1::jsonb)
      on conflict (slug) do update set
        name = excluded.name,
        logo = coalesce(nullif(agencies.logo, ''), excluded.logo),

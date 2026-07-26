@@ -58,7 +58,7 @@ export default function Admin({ store }: { store: Store }) {
   return (
     <>
       <div className="admin-hero card">
-        <BrandMark size={56} />
+        <BrandMark variant="tile" />
         <div>
           <h2>QuackedDialer Admin</h2>
           <p className="muted">Agencies, teams, and white-label logos.</p>
@@ -73,7 +73,7 @@ export default function Admin({ store }: { store: Store }) {
       <div className="card list">
         {agencies.map((a) => (
           <div key={a.id} className="list-row">
-            <BrandMark brand={{ logoUrl: a.logo || a.brand?.logoUrl, logoText: a.name?.slice(0, 2), appName: a.name }} size={40} />
+            <BrandMark brand={{ logoUrl: a.logo || a.brand?.logoUrl, logoText: a.name?.slice(0, 2), appName: a.name }} variant="tile" />
             <div style={{ flex: 1 }}>
               <b>{a.name}</b>
               <div className="tiny muted">{a.slug} · {a.team_count} teams · {a.active ? 'active' : 'off'}</div>
@@ -101,7 +101,7 @@ export default function Admin({ store }: { store: Store }) {
       <div className="card list">
         {teams.map((t) => (
           <div key={t.id} className="list-row">
-            <BrandMark brand={t.brand} size={40} />
+            <BrandMark brand={t.brand} variant="tile" />
             <div style={{ flex: 1 }}>
               <b>{t.name}</b>
               <div className="tiny muted">
@@ -133,7 +133,7 @@ export default function Admin({ store }: { store: Store }) {
       {(agencyOpen || editAgency) && (
         <Sheet title={editAgency ? 'Edit agency' : 'New agency'} onClose={() => { setAgencyOpen(false); setEditAgency(null); }}>
           <div className="logo-edit">
-            <BrandMark brand={{ logoUrl: logo, appName: name || 'Agency' }} size={72} />
+            <BrandMark brand={{ logoUrl: logo, appName: name || 'Agency' }} variant="hero" />
             <button className="btn quiet" type="button" onClick={() => fileRef.current?.click()}>Upload logo</button>
           </div>
           <label className="field"><span>Agency name</span>
@@ -172,7 +172,7 @@ export default function Admin({ store }: { store: Store }) {
       {(teamOpen || editTeam) && (
         <Sheet title={editTeam ? 'Edit team' : 'New team'} onClose={() => { setTeamOpen(false); setEditTeam(null); }}>
           <div className="logo-edit">
-            <BrandMark brand={{ logoUrl: logo, logoText: name.slice(0, 2) || 'TM', appName: name || 'Team' }} size={72} />
+            <BrandMark brand={{ logoUrl: logo, logoText: name.slice(0, 2) || 'TM', appName: name || 'Team' }} variant="hero" />
             <button className="btn quiet" type="button" onClick={() => fileRef.current?.click()}>Upload logo</button>
           </div>
           <label className="field"><span>Team name</span>
