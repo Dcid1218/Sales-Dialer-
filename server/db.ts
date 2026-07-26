@@ -135,6 +135,19 @@ export async function migrate() {
       created_at timestamptz not null default now()
     );
 
+    create table if not exists deals (
+      id              uuid primary key default gen_random_uuid(),
+      user_id         uuid not null references users(id) on delete cascade,
+      team_id         uuid references teams(id) on delete set null,
+      annual_premium  numeric not null check (annual_premium >= 0),
+      carrier         text not null,
+      draft_date      date not null,
+      note            text not null default '',
+      created_at      timestamptz not null default now()
+    );
+    create index if not exists deals_user_idx on deals(user_id, draft_date desc);
+    create index if not exists deals_team_idx on deals(team_id, draft_date desc);
+
     create index if not exists users_team_idx on users(team_id);
         create index if not exists day_logs_day_idx on day_logs(day);
         create index if not exists day_logs_user_day_idx on day_logs(user_id, day desc);

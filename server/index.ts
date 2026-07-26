@@ -484,9 +484,121 @@ api.post('/admin/users/:id/team', requireRole('admin'), async (c) => {
     [id, team_id || null, role || null],
   );
   return c.json({ ok: true });
-});
+  });
 
-/* ── integrations: CRM + auto-dialer ─────────────────────────────────── */
+  /* ── deals ───────────────────────────────────────────────────────────── */
+
+  api.get('/deals', async (c) => {
+    const user = c.get('user');
+    const scope = c.req.query('scope') || 'mine'; // mine | team
+    const limit = Math.min(200, Math.max(1, Number(c.req.query('limit') || 50)));
+
+    if (scope === 'team') {
+      if (!user.team_id) return c.json({ deals: [], totals: { count: 0, premium: 0 } });
+      if (user.role === 'agent') {
+        // agents can see team board read-only of peers? keep mine-only for agents, team for manager+
+        // user asked dashboard - show own + team for managers, own for agents with option
+      }
+    }
+
+    let rows: any[] = [];
+    if (scope === 'team' && user.team_id && (user.role === 'manager' || user.role === 'admin')) {
+      rows = await q(
+        `select d.id, d.user_id, d.team_id, d.annual_premium, d.carrier,
+                to_char(d.draft_date,'YYYY-MM-DD') as draft_date, d.note, d.created_at,
+                u.name as agent_name
+         from deals d
+         join users u on u.id = d.user_id
+         where d.team_id = $1
+         order by d.draft_date desc, d.created_at desc
+         limit $2`,
+        [user.team_id, limit],
+      );
+    } else if (scope === 'all' && user.role === 'admin') {
+      rows = await q(
+        `select d.id, d.user_id, d.team_id, d.annual_premium, d.carrier,
+                to_char(d.draft_date,'YYYY-MM-DD') as draft_date, d.note, d.created_at,
+                u.name as agent_name, t.name as team_name
+         from deals d
+         join users u on u.id = d.user_id
+         left join teams t on t.id = d.team_id
+         order by d.draft_date desc, d.created_at desc
+         limit $1`,
+        [limit],
+      );
+    } else {
+      rows = await q(
+        `select d.id, d.user_id, d.team_id, d.annual_premium, d.carrier,
+                to_char(d.draft_date,'YYYY-MM-DD') as draft_date, d.note, d.created_at,
+                u.name as agent_name
+         from deals d
+         join users u on u.id = d.user_id
+         where d.user_id = $1
+         order by d.draft_date desc, d.created_at desc
+         limit $2`,
+        [user.id, limit],
+      );
+    }
+
+    const deals = rows.map((r) => ({
+      ...r,
+      annual_premium: Number(r.annual_premium),
+    }));
+    const totals = {
+      count: deals.length,
+      premium: deals.reduce((s, d) => s + Number(d.annual_premium || 0), 0),
+    };
+    return c.json({ deals, totals });
+  });
+
+  api.post('/deals', async (c) => {
+    const user = c.get('user');
+    const b = await c.req.json<any>();
+    const premium = Number(b.annual_premium ?? b.annualPremium);
+    const carrier = String(b.carrier || '').trim();
+    const draftDate = String(b.draft_date || b.draftDate || '').trim();
+    const note = String(b.note || '').trim();
+
+    if (!(premium >= 0) || Number.isNaN(premium)) return c.json({ error: 'Annual premium is required.' }, 400);
+    if (!carrier) return c.json({ error: 'Carrier is required.' }, 400);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(draftDate)) return c.json({ error: 'Draft date is required (YYYY-MM-DD).' }, 400);
+
+    const [row] = await q(
+      `insert into deals (user_id, team_id, annual_premium, carrier, draft_date, note)
+       values ($1,$2,$3,$4,$5,$6)
+       returning id, user_id, team_id, annual_premium, carrier,
+                 to_char(draft_date,'YYYY-MM-DD') as draft_date, note, created_at`,
+      [user.id, user.team_id, premium, carrier, draftDate, note],
+    );
+
+    // bump today's sales + premium on day log for consistency
+    const today = new Date();
+    const day = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    await q(
+      `insert into day_logs (user_id, day, dials, contacts, appts, sales, premium, updated_at)
+       values ($1,$2,0,0,0,1,$3, now())
+       on conflict (user_id, day) do update set
+         sales = day_logs.sales + 1,
+         premium = day_logs.premium + excluded.premium,
+         updated_at = now()`,
+      [user.id, day, premium],
+    );
+
+    return c.json({ ...row, annual_premium: Number(row.annual_premium) }, 201);
+  });
+
+  api.delete('/deals/:id', async (c) => {
+    const user = c.get('user');
+    const id = c.req.param('id');
+    const deal = await q1<any>(`select * from deals where id = $1`, [id]);
+    if (!deal) return c.json({ error: 'not found' }, 404);
+    if (deal.user_id !== user.id && user.role === 'agent') return c.json({ error: 'Forbidden' }, 403);
+    if (user.role === 'manager' && deal.team_id !== user.team_id) return c.json({ error: 'Forbidden' }, 403);
+    await q(`delete from deals where id = $1`, [id]);
+    return c.json({ ok: true });
+  });
+
+  /* ── integrations: CRM + auto-dialer ─────────────────────────────────── */
 
 api.post('/integrations/crm/sync', async (c) => {
   const user = c.get('user');

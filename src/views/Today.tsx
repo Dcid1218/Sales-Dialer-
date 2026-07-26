@@ -111,6 +111,13 @@ export default function Today({ store }: { store: Store }) {
         <div className="track"><div className="fill em" style={{ width: `${Math.min(100, ptgt > 0 ? Math.round(today.premium / ptgt * 100) : 0)}%` }} /></div>
       </div>
 
+      <button className="btn primary wide" style={{ marginTop: 16 }} onClick={() => setPremOpen(true)}>
+        + Quick premium
+      </button>
+      <p className="tiny muted" style={{ marginTop: 8, textAlign: 'center' }}>
+        For full deals (carrier + draft date), use the Deals tab.
+      </p>
+
       {premOpen && (
         <Sheet title="Add premium" onClose={() => setPremOpen(false)}>
           <label className="field"><span>Amount</span>

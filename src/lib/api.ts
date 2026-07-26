@@ -44,6 +44,10 @@ export const api = {
   updateAgency: (id: string, b: any) => raw('PATCH', `/admin/agencies/${id}`, b),
   assignUserTeam: (id: string, b: any) => raw('POST', `/admin/users/${id}/team`, b),
   crmSync: () => raw('POST', '/integrations/crm/sync'),
-  dialerStart: (b?: any) => raw('POST', '/integrations/dialer/start', b || {}),
-  integrationsLog: () => raw('GET', '/integrations/log'),
-};
+    dialerStart: (b?: any) => raw('POST', '/integrations/dialer/start', b || {}),
+    integrationsLog: () => raw('GET', '/integrations/log'),
+    deals: (scope: 'mine' | 'team' | 'all' = 'mine') => raw('GET', `/deals?scope=${scope}`),
+    createDeal: (b: { annual_premium: number; carrier: string; draft_date: string; note?: string }) =>
+      raw('POST', '/deals', b),
+    deleteDeal: (id: string) => raw('DELETE', `/deals/${id}`),
+  };

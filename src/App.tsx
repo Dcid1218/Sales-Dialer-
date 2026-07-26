@@ -15,6 +15,7 @@ import Board from './views/Board.tsx';
 import Manage from './views/Manage.tsx';
 import Admin from './views/Admin.tsx';
 import Profile from './views/Profile.tsx';
+import Deals from './views/Deals.tsx';
 
 export type Store = {
   user: User;
@@ -27,7 +28,7 @@ export type Store = {
   say: (msg: string) => void;
 };
 
-type Tab = 'today' | 'schedule' | 'stats' | 'board' | 'manage' | 'admin' | 'profile';
+type Tab = 'today' | 'schedule' | 'stats' | 'deals' | 'board' | 'manage' | 'admin' | 'profile';
 type Gate = 'checking' | 'welcome' | 'onboard' | 'open';
 
 const DEFAULT_SETTINGS: Settings = {
@@ -108,18 +109,19 @@ export default function App() {
 
   const tabs = useMemo(() => {
     const base: { id: Tab; label: string; short: string }[] = [
-      { id: 'today', label: 'Today', short: 'Today' },
-      { id: 'schedule', label: 'Schedule', short: 'Plan' },
-      { id: 'stats', label: 'Stats', short: 'Stats' },
-      { id: 'board', label: 'Board', short: 'Board' },
-      { id: 'profile', label: 'Profile', short: 'You' },
-    ];
-    if (user?.role === 'manager' || user?.role === 'admin') {
-      base.splice(4, 0, { id: 'manage', label: 'Team', short: 'Team' });
-    }
-    if (user?.role === 'admin') {
-      base.splice(5, 0, { id: 'admin', label: 'Admin', short: 'Admin' });
-    }
+          { id: 'today', label: 'Today', short: 'Today' },
+          { id: 'schedule', label: 'Schedule', short: 'Plan' },
+          { id: 'stats', label: 'Stats', short: 'Stats' },
+          { id: 'deals', label: 'Deals', short: 'Deals' },
+          { id: 'board', label: 'Board', short: 'Board' },
+          { id: 'profile', label: 'Profile', short: 'You' },
+        ];
+        if (user?.role === 'manager' || user?.role === 'admin') {
+          base.splice(5, 0, { id: 'manage', label: 'Team', short: 'Team' });
+        }
+        if (user?.role === 'admin') {
+          base.splice(6, 0, { id: 'admin', label: 'Admin', short: 'Admin' });
+        }
     return base;
   }, [user?.role]);
 
@@ -143,9 +145,9 @@ export default function App() {
   const store: Store = { user, setUser, days, settings, reload, bump, savePremium, say };
   const brand = user.team_brand || PLATFORM_BRAND;
   const Screen = {
-    today: Today, schedule: Schedule, stats: Stats, board: Board,
-    manage: Manage, admin: Admin, profile: Profile,
-  }[tab];
+      today: Today, schedule: Schedule, stats: Stats, deals: Deals, board: Board,
+      manage: Manage, admin: Admin, profile: Profile,
+    }[tab];
 
   return (
     <>
