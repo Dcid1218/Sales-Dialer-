@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api.ts';
 import type { Team, User } from '../lib/core.ts';
+import { BrandMark } from './BrandMark.tsx';
+import { PLATFORM_BRAND } from '../lib/brand.ts';
+import { applyBrand } from '../lib/core.ts';
 
 export default function Onboarding({ user, onDone }: { user: User; onDone: (u: User) => void }) {
   const [step, setStep] = useState(0);
@@ -14,6 +17,7 @@ export default function Onboarding({ user, onDone }: { user: User; onDone: (u: U
   const [error, setError] = useState('');
 
   useEffect(() => {
+    applyBrand(PLATFORM_BRAND);
     api.teams().then((r) => setTeams(r.teams)).catch(() => {});
   }, []);
 
@@ -37,8 +41,12 @@ export default function Onboarding({ user, onDone }: { user: User; onDone: (u: U
 
   return (
     <div className="welcome">
-      <div className="bgfx"><div className="blob g" /><div className="blob e" /><div className="grain" /></div>
+      <div className="bgfx golf"><div className="blob g" /><div className="blob e" /><div className="grain" /></div>
       <div className="welcome-card onboard">
+        <div className="welcome-mark" style={{ marginBottom: 12 }}>
+          <BrandMark size={48} brand={PLATFORM_BRAND} />
+          <div className="wm" style={{ fontSize: 18 }}>QuackedDialer</div>
+        </div>
         <div className="steps">{[0, 1, 2].map((i) => <span key={i} className={i <= step ? 'on' : ''} />)}</div>
 
         {step === 0 && (
@@ -64,11 +72,11 @@ export default function Onboarding({ user, onDone }: { user: User; onDone: (u: U
                   className={`team-card ${teamId === t.id ? 'on' : ''}`}
                   onClick={() => setTeamId(t.id)}
                   style={{
-                    ['--tp' as any]: t.brand?.primary || '#f5c451',
-                    ['--ta' as any]: t.brand?.accent || '#10d488',
+                    ['--tp' as any]: t.brand?.primary || '#C4A35A',
+                    ['--ta' as any]: t.brand?.accent || '#0B5C3B',
                   }}
                 >
-                  <b>{t.brand?.logoText || t.name.slice(0, 2)}</b>
+                  <BrandMark brand={t.brand} size={42} />
                   <span>{t.name}</span>
                 </button>
               ))}

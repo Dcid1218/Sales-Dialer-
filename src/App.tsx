@@ -4,6 +4,8 @@ import {
   applyBrand, blankDay, dayKey, type DayLog, type Settings, type User,
 } from './lib/core.ts';
 import { Toast } from './components/ui.tsx';
+import { BrandMark } from './components/BrandMark.tsx';
+import { PLATFORM_BRAND } from './lib/brand.ts';
 import Welcome from './components/Welcome.tsx';
 import Onboarding from './components/Onboarding.tsx';
 import Today from './views/Today.tsx';
@@ -53,21 +55,21 @@ export default function App() {
     setDays(data.days || {});
     setSettings({ ...DEFAULT_SETTINGS, ...data.settings });
     if (data.user) {
-      setUser(data.user);
-      applyBrand(data.user.team_brand);
-    }
+          setUser(data.user);
+          applyBrand(data.user.team_brand || PLATFORM_BRAND);
+        }
   }, []);
 
   const enter = useCallback(async (u: User) => {
-    setUser(u);
-    applyBrand(u.team_brand);
-    if (!u.onboarded || !u.team_id) {
-      setGate('onboard');
-      return;
-    }
-    await reload();
-    setGate('open');
-  }, [reload]);
+      setUser(u);
+      applyBrand(u.team_brand || PLATFORM_BRAND);
+      if (!u.onboarded || !u.team_id) {
+        setGate('onboard');
+        return;
+      }
+      await reload();
+      setGate('open');
+    }, [reload]);
 
   useEffect(() => {
     api.session()
@@ -124,53 +126,53 @@ export default function App() {
       <Onboarding
         user={user}
         onDone={async (u) => {
-          setUser(u);
-          applyBrand(u.team_brand);
-          await reload();
-          setGate('open');
-        }}
+                  setUser(u);
+                  applyBrand(u.team_brand || PLATFORM_BRAND);
+                  await reload();
+                  setGate('open');
+                }}
       />
     );
   }
   if (!user) return <Welcome onAuthed={enter} />;
 
   const store: Store = { user, setUser, days, settings, reload, bump, savePremium, say };
-  const brand = user.team_brand || {};
-  const Screen = {
-    today: Today, schedule: Schedule, stats: Stats, board: Board,
-    manage: Manage, admin: Admin, profile: Profile,
-  }[tab];
+    const brand = user.team_brand || PLATFORM_BRAND;
+    const Screen = {
+      today: Today, schedule: Schedule, stats: Stats, board: Board,
+      manage: Manage, admin: Admin, profile: Profile,
+    }[tab];
 
-  return (
-    <>
-      <div className="bgfx"><div className="blob g" /><div className="blob e" /><div className="grain" /></div>
-      <div className="app">
-        <header>
-          <div className="logo">
-            <div className="mk">{brand.logoText || 'QD'}</div>
-            <div>
-              <div className="wm">{brand.appName || user.team_name || 'QuackedDialer'}</div>
-              <div className="tag">{brand.tagline || 'Sales Performance OS'}</div>
+    return (
+      <>
+        <div className="bgfx golf"><div className="blob g" /><div className="blob e" /><div className="grain" /></div>
+        <div className="app">
+          <header>
+            <div className="logo">
+              <BrandMark brand={brand} size={42} />
+              <div>
+                <div className="wm">{brand.appName || user.team_name || 'QuackedDialer'}</div>
+                <div className="tag">{brand.tagline || 'Sales Performance OS'}</div>
+              </div>
             </div>
-          </div>
-          <div className="h-right">
-            <span className="role-pill">{user.role}</span>
-          </div>
-        </header>
+            <div className="h-right">
+              <span className="role-pill">{user.role}</span>
+            </div>
+          </header>
 
-        <Screen store={store} />
-      </div>
-
-      <nav className="botnav">
-        <div className="botnav-inner">
-          {tabs.map((t) => (
-            <button key={t.id} className={tab === t.id ? 'on' : ''} onClick={() => setTab(t.id)}>
-              {t.label}
-            </button>
-          ))}
+          <Screen store={store} />
         </div>
-      </nav>
-      {toast && <Toast text={toast} />}
-    </>
-  );
-}
+
+        <nav className="botnav">
+          <div className="botnav-inner">
+            {tabs.map((t) => (
+              <button key={t.id} className={tab === t.id ? 'on' : ''} onClick={() => setTab(t.id)}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </nav>
+        {toast && <Toast text={toast} />}
+      </>
+    );
+  }

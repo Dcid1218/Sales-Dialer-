@@ -2,6 +2,8 @@ import { useRef, useState } from 'react';
 import type { Store } from '../App.tsx';
 import { api } from '../lib/api.ts';
 import { Avatar, Sheet } from '../components/ui.tsx';
+import { BrandMark } from '../components/BrandMark.tsx';
+import { PLATFORM_BRAND } from '../lib/brand.ts';
 
 export default function Profile({ store }: { store: Store }) {
   const { user, settings, setUser, reload, say } = store;
@@ -27,19 +29,23 @@ export default function Profile({ store }: { store: Store }) {
   return (
     <>
       <div className="card profile-hero">
-        <button type="button" className="avatar-btn" onClick={() => fileRef.current?.click()}>
-          <Avatar src={user.avatar} name={user.name || user.email} size={72} />
-        </button>
-        <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => setAvatar(e.target.files?.[0] ?? null)} />
-        <div>
-          <h2>{user.name || 'Agent'}</h2>
-          <p className="muted">{user.email}</p>
-          <div className="pills">
-            <span className="pill">{user.team_name || 'No team'}</span>
-            <span className="pill">{user.role}</span>
-          </div>
-        </div>
-      </div>
+              <button type="button" className="avatar-btn" onClick={() => fileRef.current?.click()}>
+                <Avatar src={user.avatar} name={user.name || user.email} size={72} />
+              </button>
+              <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => setAvatar(e.target.files?.[0] ?? null)} />
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                  <BrandMark brand={user.team_brand || PLATFORM_BRAND} size={28} />
+                  <span className="tiny" style={{ color: 'var(--gold)', fontWeight: 700 }}>{user.team_name || 'QuackedDialer'}</span>
+                </div>
+                <h2>{user.name || 'Agent'}</h2>
+                <p className="muted">{user.email}</p>
+                <div className="pills">
+                  <span className="pill">{user.team_name || 'No team'}</span>
+                  <span className="pill">{user.role}</span>
+                </div>
+              </div>
+            </div>
 
       <div className="card list">
         <button className="list-row btnish" onClick={() => { setG(settings); setGoals(true); }}>

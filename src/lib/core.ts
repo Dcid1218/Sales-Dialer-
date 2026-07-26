@@ -12,9 +12,12 @@ export type User = {
 };
 export type Brand = {
   appName?: string; tagline?: string; primary?: string; accent?: string;
-  logoText?: string; theme?: string; bg?: string;
+  logoText?: string; logoUrl?: string; theme?: string; bg?: string;
 };
-export type Team = { id: string; slug: string; name: string; brand: Brand };
+export type Team = {
+  id: string; slug: string; name: string; brand: Brand;
+  agency_id?: string | null; agency_name?: string | null; agency_logo?: string | null;
+};
 
 export const blankDay = (): DayLog => ({ dials: 0, contacts: 0, appts: 0, sales: 0, premium: 0 });
 
@@ -44,14 +47,27 @@ export function dailyPremiumTarget(s: Settings) {
 export function applyBrand(brand?: Brand | null) {
   const root = document.documentElement;
   const b = brand || {};
-  root.style.setProperty('--gold', b.primary || '#f5c451');
-  root.style.setProperty('--gold2', b.primary ? lighten(b.primary, 0.25) : '#ffe39b');
-  root.style.setProperty('--em', b.accent || '#10d488');
-  root.style.setProperty('--em2', b.accent ? lighten(b.accent, 0.2) : '#5cf0b8');
-  root.style.setProperty('--bg', b.bg || '#05070a');
+  const gold = b.primary || '#C4A35A';
+  const green = b.accent || '#0B5C3B';
+  const bg = b.bg || '#F7F5F0';
+  root.style.setProperty('--gold', gold);
+  root.style.setProperty('--gold2', lighten(gold, 0.22));
+  root.style.setProperty('--gold-soft', 'rgba(196, 163, 90, 0.18)');
+  root.style.setProperty('--em', green);
+  root.style.setProperty('--em2', lighten(green, 0.18));
+  root.style.setProperty('--em-soft', 'rgba(11, 92, 59, 0.10)');
+  root.style.setProperty('--bg', bg);
+  root.style.setProperty('--bg2', '#FFFFFF');
+  root.style.setProperty('--ink', '#0A2F1F');
+  root.style.setProperty('--muted', '#5C6F64');
+  root.style.setProperty('--line', 'rgba(11, 92, 59, 0.14)');
+  root.style.setProperty('--line2', 'rgba(11, 92, 59, 0.22)');
+  root.style.setProperty('--card', 'rgba(255,255,255,0.88)');
+  root.style.setProperty('--card2', '#FFFFFF');
+  document.body.dataset.theme = b.theme || 'light';
   document.title = b.appName || 'QuackedDialer';
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', b.bg || '#05070a');
+  if (meta) meta.setAttribute('content', green);
   const apple = document.querySelector('meta[name="apple-mobile-web-app-title"]');
   if (apple) apple.setAttribute('content', b.appName || 'QuackedDialer');
 }

@@ -25,24 +25,41 @@ export async function q1<T = any>(text: string, params: any[] = []): Promise<T |
   return rows[0] ?? null;
 }
 
-const DEFAULT_BRANDS = {
+const GREEN = '#0B5C3B';
+const GOLD = '#C4A35A';
+const CREAM = '#F7F5F0';
+
+const DEFAULT_AGENCY = {
+  appName: 'QuackedDialer',
+  tagline: 'Sales Performance OS',
+  primary: GOLD,
+  accent: GREEN,
+  logoText: 'QD',
+  logoUrl: '/brand/quacked-logo.jpg',
+  theme: 'light',
+  bg: CREAM,
+};
+
+const TEAM_BRANDS = {
   wolfpack: {
     appName: 'WOLFPACK DIRECT',
     tagline: 'Powered by QuackedDialer',
-    primary: '#f5c451',
-    accent: '#10d488',
+    primary: GOLD,
+    accent: GREEN,
     logoText: 'WP',
-    theme: 'dark',
-    bg: '#05070a',
+    logoUrl: '',
+    theme: 'light',
+    bg: CREAM,
   },
   yns: {
     appName: "YN's",
     tagline: 'Powered by QuackedDialer',
-    primary: '#7c8cf0',
-    accent: '#22d3ee',
+    primary: GOLD,
+    accent: GREEN,
     logoText: 'YN',
-    theme: 'dark',
-    bg: '#07060f',
+    logoUrl: '',
+    theme: 'light',
+    bg: CREAM,
   },
 };
 
@@ -50,10 +67,21 @@ export async function migrate() {
   if (!url) throw new Error('DATABASE_URL is not set');
 
   await pool.query(`
+    create table if not exists agencies (
+      id          uuid primary key default gen_random_uuid(),
+      slug        text not null unique,
+      name        text not null,
+      logo        text,
+      brand       jsonb not null default '{}',
+      active      boolean not null default true,
+      created_at  timestamptz not null default now()
+    );
+
     create table if not exists teams (
       id          uuid primary key default gen_random_uuid(),
       slug        text not null unique,
       name        text not null,
+      agency_id   uuid references agencies(id) on delete set null,
       brand       jsonb not null default '{}',
       active      boolean not null default true,
       created_at  timestamptz not null default now()
@@ -110,16 +138,52 @@ export async function migrate() {
     create index if not exists users_team_idx on users(team_id);
     create index if not exists day_logs_day_idx on day_logs(day);
     create index if not exists day_logs_user_day_idx on day_logs(user_id, day desc);
+    create index if not exists teams_agency_idx on teams(agency_id);
   `);
 
-  /* seed fixed teams */
+  /* legacy teams may lack agency_id */
+  await pool.query(`
+    do $$ begin
+      if not exists (
+        select 1 from information_schema.columns
+        where table_name = 'teams' and column_name = 'agency_id'
+      ) then
+        alter table teams add column agency_id uuid references agencies(id) on delete set null;
+      end if;
+    end $$;
+  `);
+
+  const [agency] = await q<any>(
+    `insert into agencies (slug, name, logo, brand)
+     values ('quacked-dialer', 'QuackedDialer', '/brand/quacked-logo.jpg', $1::jsonb)
+     on conflict (slug) do update set
+       name = excluded.name,
+       logo = coalesce(nullif(agencies.logo, ''), excluded.logo),
+       brand = excluded.brand
+     returning *`,
+    [JSON.stringify(DEFAULT_AGENCY)],
+  );
+
   await pool.query(
-    `insert into teams (slug, name, brand)
+    `insert into teams (slug, name, agency_id, brand)
      values
-       ('wolfpack-direct', 'WOLFPACK DIRECT', $1::jsonb),
-       ('yns', 'YN''s', $2::jsonb)
-     on conflict (slug) do update set name = excluded.name, brand = excluded.brand`,
-    [JSON.stringify(DEFAULT_BRANDS.wolfpack), JSON.stringify(DEFAULT_BRANDS.yns)],
+       ('wolfpack-direct', 'WOLFPACK DIRECT', $1, $2::jsonb),
+       ('yns', 'YN''s', $1, $3::jsonb)
+     on conflict (slug) do update set
+       agency_id = coalesce(teams.agency_id, excluded.agency_id),
+       name = excluded.name,
+       brand = case
+         when teams.brand ? 'logoUrl' and nullif(teams.brand->>'logoUrl','') is not null
+         then teams.brand || jsonb_build_object(
+           'primary', excluded.brand->>'primary',
+           'accent', excluded.brand->>'accent',
+           'bg', excluded.brand->>'bg',
+           'theme', excluded.brand->>'theme',
+           'tagline', excluded.brand->>'tagline'
+         )
+         else excluded.brand
+       end`,
+    [agency.id, JSON.stringify(TEAM_BRANDS.wolfpack), JSON.stringify(TEAM_BRANDS.yns)],
   );
 
   console.log('schema ready');

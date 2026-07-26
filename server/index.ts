@@ -39,7 +39,12 @@ api.get('/health', (c) => c.json({ ok: true, db: dbReady }));
 
 api.get('/teams', async (c) => {
   const rows = await q(
-    `select id, slug, name, brand from teams where active = true order by name`,
+    `select t.id, t.slug, t.name, t.brand, t.agency_id,
+            a.name as agency_name, a.logo as agency_logo, a.brand as agency_brand
+     from teams t
+     left join agencies a on a.id = t.agency_id
+     where t.active = true
+     order by a.name nulls last, t.name`,
   );
   return c.json({ teams: rows });
 });
@@ -364,12 +369,66 @@ api.patch('/team/members/:id/role', requireRole('manager', 'admin'), async (c) =
   return c.json({ ok: true });
 });
 
-/* ── admin teams ─────────────────────────────────────────────────────── */
+/* ── admin agencies + teams ──────────────────────────────────────────── */
+
+api.get('/admin/agencies', requireRole('admin'), async (c) => {
+  const agencies = await q(
+    `select a.*,
+            (select count(*)::int from teams tm where tm.agency_id = a.id) as team_count
+     from agencies a order by a.name`,
+  );
+  return c.json({ agencies });
+});
+
+api.post('/admin/agencies', requireRole('admin'), async (c) => {
+  const b = await c.req.json<any>();
+  const name = String(b.name || '').trim();
+  const slug = String(b.slug || name).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  if (!name || !slug) return c.json({ error: 'Name required.' }, 400);
+  const brand = b.brand || {
+    appName: name,
+    tagline: 'Powered by QuackedDialer',
+    primary: '#C4A35A',
+    accent: '#0B5C3B',
+    logoText: name.slice(0, 2).toUpperCase(),
+    logoUrl: b.logo || '',
+    theme: 'light',
+    bg: '#F7F5F0',
+  };
+  try {
+    const [row] = await q(
+      `insert into agencies (slug, name, logo, brand) values ($1,$2,$3,$4::jsonb) returning *`,
+      [slug, name, b.logo || brand.logoUrl || null, JSON.stringify(brand)],
+    );
+    return c.json(row, 201);
+  } catch (e: any) {
+    if (/unique/i.test(e.message)) return c.json({ error: 'Slug already exists.' }, 409);
+    throw e;
+  }
+});
+
+api.patch('/admin/agencies/:id', requireRole('admin'), async (c) => {
+  const id = c.req.param('id');
+  const b = await c.req.json<any>();
+  const fields: string[] = [];
+  const vals: any[] = [];
+  if (typeof b.name === 'string') { fields.push(`name = $${fields.length + 1}`); vals.push(b.name.trim()); }
+  if (typeof b.logo === 'string' || b.logo === null) { fields.push(`logo = $${fields.length + 1}`); vals.push(b.logo); }
+  if (b.brand) { fields.push(`brand = $${fields.length + 1}::jsonb`); vals.push(JSON.stringify(b.brand)); }
+  if (typeof b.active === 'boolean') { fields.push(`active = $${fields.length + 1}`); vals.push(b.active); }
+  if (!fields.length) return c.json({ error: 'nothing' }, 400);
+  vals.push(id);
+  const [row] = await q(`update agencies set ${fields.join(', ')} where id = $${vals.length} returning *`, vals);
+  return c.json(row);
+});
 
 api.get('/admin/teams', requireRole('admin'), async (c) => {
   const teams = await q(
-    `select t.*, (select count(*)::int from users u where u.team_id = t.id) as member_count
-     from teams t order by t.name`,
+    `select t.*, a.name as agency_name, a.logo as agency_logo,
+            (select count(*)::int from users u where u.team_id = t.id) as member_count
+     from teams t
+     left join agencies a on a.id = t.agency_id
+     order by a.name nulls last, t.name`,
   );
   return c.json({ teams });
 });
@@ -381,17 +440,19 @@ api.post('/admin/teams', requireRole('admin'), async (c) => {
   if (!name || !slug) return c.json({ error: 'Name required.' }, 400);
   const brand = b.brand || {
     appName: name,
-    tagline: 'Sales Performance OS',
-    primary: '#f5c451',
-    accent: '#10d488',
+    tagline: 'Powered by QuackedDialer',
+    primary: '#C4A35A',
+    accent: '#0B5C3B',
     logoText: name.slice(0, 2).toUpperCase(),
-    theme: 'dark',
-    bg: '#05070a',
+    logoUrl: b.logo || '',
+    theme: 'light',
+    bg: '#F7F5F0',
   };
+  if (b.logo) brand.logoUrl = b.logo;
   try {
     const [row] = await q(
-      `insert into teams (slug, name, brand) values ($1,$2,$3::jsonb) returning *`,
-      [slug, name, JSON.stringify(brand)],
+      `insert into teams (slug, name, agency_id, brand) values ($1,$2,$3,$4::jsonb) returning *`,
+      [slug, name, b.agency_id || null, JSON.stringify(brand)],
     );
     return c.json(row, 201);
   } catch (e: any) {
@@ -408,6 +469,7 @@ api.patch('/admin/teams/:id', requireRole('admin'), async (c) => {
   if (typeof b.name === 'string') { fields.push(`name = $${fields.length + 1}`); vals.push(b.name.trim()); }
   if (b.brand) { fields.push(`brand = $${fields.length + 1}::jsonb`); vals.push(JSON.stringify(b.brand)); }
   if (typeof b.active === 'boolean') { fields.push(`active = $${fields.length + 1}`); vals.push(b.active); }
+  if (b.agency_id !== undefined) { fields.push(`agency_id = $${fields.length + 1}`); vals.push(b.agency_id || null); }
   if (!fields.length) return c.json({ error: 'nothing' }, 400);
   vals.push(id);
   const [row] = await q(`update teams set ${fields.join(', ')} where id = $${vals.length} returning *`, vals);

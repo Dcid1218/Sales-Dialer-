@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { api } from '../lib/api.ts';
 import type { User } from '../lib/core.ts';
+import { PLATFORM_BRAND } from '../lib/brand.ts';
+import { applyBrand } from '../lib/core.ts';
+import { BrandMark } from './BrandMark.tsx';
 import { Segmented } from './ui.tsx';
+import { useEffect } from 'react';
 
 export default function Welcome({ onAuthed }: { onAuthed: (u: User) => void }) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
@@ -10,6 +14,8 @@ export default function Welcome({ onAuthed }: { onAuthed: (u: User) => void }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => { applyBrand(PLATFORM_BRAND); }, []);
 
   async function submit() {
     if (busy) return;
@@ -28,10 +34,10 @@ export default function Welcome({ onAuthed }: { onAuthed: (u: User) => void }) {
 
   return (
     <div className="welcome">
-      <div className="bgfx"><div className="blob g" /><div className="blob e" /><div className="grain" /></div>
+      <div className="bgfx golf"><div className="blob g" /><div className="blob e" /><div className="grain" /></div>
       <div className="welcome-card">
         <div className="welcome-mark">
-          <span className="mk">QD</span>
+          <BrandMark size={64} brand={PLATFORM_BRAND} />
           <div>
             <div className="wm">QuackedDialer</div>
             <div className="tag">Sales Performance OS</div>
@@ -39,7 +45,7 @@ export default function Welcome({ onAuthed }: { onAuthed: (u: User) => void }) {
         </div>
         <h1>{mode === 'login' ? 'Back on the phones.' : 'Build your book.'}</h1>
         <p className="sub">
-          Track dials, zones, and premium. Join your team and the whole app white-labels to them.
+          Track dials, zones, and premium. Join your team and the app white-labels to them.
         </p>
         <Segmented
           value={mode}
