@@ -50,4 +50,20 @@ export const api = {
     createDeal: (b: { annual_premium: number; carrier: string; draft_date: string; note?: string }) =>
       raw('POST', '/deals', b),
     deleteDeal: (id: string) => raw('DELETE', `/deals/${id}`),
+
+  schedule: () => raw('GET', '/schedule') as Promise<{ mode: string; blocks: any[] }>,
+  saveSchedule: (b: { mode: string; blocks: any[] }) => raw('PUT', '/schedule', b),
+
+  leads: (opts?: { status?: string; q?: string; limit?: number }) => {
+    const p = new URLSearchParams();
+    if (opts?.status) p.set('status', opts.status);
+    if (opts?.q) p.set('q', opts.q);
+    if (opts?.limit) p.set('limit', String(opts.limit));
+    const qs = p.toString();
+    return raw('GET', `/leads${qs ? `?${qs}` : ''}`) as Promise<{ leads: any[]; counts: { status: string; n: number }[] }>;
+  },
+  importLeads: (rows: Record<string, string>[]) =>
+    raw('POST', '/leads/import', { rows }) as Promise<{ ok: boolean; imported: number; skipped: number }>,
+  updateLead: (id: string, b: any) => raw('PATCH', `/leads/${id}`, b) as Promise<{ lead: any }>,
+  deleteLead: (id: string) => raw('DELETE', `/leads/${id}`),
   };
