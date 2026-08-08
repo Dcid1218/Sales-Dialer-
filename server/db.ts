@@ -148,6 +148,54 @@ export async function migrate() {
     create index if not exists deals_user_idx on deals(user_id, draft_date desc);
     create index if not exists deals_team_idx on deals(team_id, draft_date desc);
 
+    create table if not exists user_schedules (
+      user_id     uuid primary key references users(id) on delete cascade,
+      mode        text not null default 'std' check (mode in ('std','isl','custom')),
+      blocks      jsonb not null default '[]',
+      updated_at  timestamptz not null default now()
+    );
+
+    create table if not exists team_schedules (
+      team_id     uuid primary key references teams(id) on delete cascade,
+      mode        text not null default 'std' check (mode in ('std','isl','custom')),
+      blocks      jsonb not null default '[]',
+      name        text not null default 'Team plan',
+      updated_by  uuid references users(id) on delete set null,
+      updated_at  timestamptz not null default now()
+    );
+
+    create table if not exists leads (
+      id            uuid primary key default gen_random_uuid(),
+      user_id       uuid not null references users(id) on delete cascade,
+      team_id       uuid references teams(id) on delete set null,
+      name          text not null default '',
+      phone         text not null default '',
+      email         text not null default '',
+      status        text not null default 'new' check (status in ('new','called','contacted','callback','not_interested','sold','dnc')),
+      notes         text not null default '',
+      source        text not null default 'csv',
+      meta          jsonb not null default '{}',
+      shared        boolean not null default false,
+      callback_at   timestamptz,
+      last_contact  timestamptz,
+      created_at    timestamptz not null default now(),
+      updated_at    timestamptz not null default now()
+    );
+    create index if not exists leads_user_idx on leads(user_id, status, created_at desc);
+    create index if not exists leads_team_idx on leads(team_id, shared, created_at desc);
+    create index if not exists leads_phone_idx on leads(user_id, phone);
+    create index if not exists leads_callback_idx on leads(user_id, callback_at) where callback_at is not null;
+
+    create table if not exists lead_events (
+      id         uuid primary key default gen_random_uuid(),
+      lead_id    uuid not null references leads(id) on delete cascade,
+      user_id    uuid references users(id) on delete set null,
+      kind       text not null,
+      detail     jsonb not null default '{}',
+      created_at timestamptz not null default now()
+    );
+    create index if not exists lead_events_lead_idx on lead_events(lead_id, created_at desc);
+
     create index if not exists users_team_idx on users(team_id);
         create index if not exists day_logs_day_idx on day_logs(day);
         create index if not exists day_logs_user_day_idx on day_logs(user_id, day desc);
@@ -165,6 +213,20 @@ export async function migrate() {
         end $$;
       `);
       await pool.query(`create index if not exists teams_agency_idx on teams(agency_id)`);
+
+  // safe upgrades if tables already existed without newer columns
+  await pool.query(`
+    do $$ begin
+      if exists (select 1 from information_schema.tables where table_name = 'leads') then
+        if not exists (select 1 from information_schema.columns where table_name='leads' and column_name='shared') then
+          alter table leads add column shared boolean not null default false;
+        end if;
+        if not exists (select 1 from information_schema.columns where table_name='leads' and column_name='callback_at') then
+          alter table leads add column callback_at timestamptz;
+        end if;
+      end if;
+    end $$;
+  `);
 
       const [agency] = await q<any>(
     `insert into agencies (slug, name, logo, brand)
