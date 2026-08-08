@@ -7,23 +7,23 @@ Multi-user sales performance OS for life insurance teams. White-labels to the ag
 - Hono API + Postgres
 - Railway deploy
 
-## Branding
-- Platform: **QuackedDialer**
-- After team select: header/splash chrome uses **team name** + team colors
-- Seeded teams: **WOLFPACK DIRECT**, **YN's**
+## Features
+- **Left hamburger menu** — replaces bottom bar; fixed sidebar on desktop
+- **Editable day plan** — Standard / Island / custom blocks; **team-level presets** (managers)
+- **Leads workspace**
+  - CSV import (personal or team shared pool)
+  - Detail sheet: notes, callback time, activity history
+  - Bulk status / share / delete
+  - Dial queue (Call `tel:` · SMS `sms:`)
+  - Manager team-wide visibility
+- Daily counters, deals, leaderboard, admin
 
 ## Roles
 - `agent` — personal tracker + leads + plan
-- `manager` — team roster + integration log + leaderboard
-- `admin` — all teams, create teams, elevate roles
+- `manager` — team roster, shared leads, team schedule
+- `admin` — all teams
 
 Set `BOOTSTRAP_ADMIN_EMAIL` so the first matching account becomes admin.
-
-## Features (current)
-- **Left hamburger menu** (replaces bottom bar) — expands on click; persistent sidebar on desktop
-- **Editable day plan** — Standard / Island presets + full custom block editor, saved per user
-- **Leads workspace** — upload CSV, list/filter, Call opens native `tel:`, SMS opens `sms:`
-- Daily counters, deals, leaderboard, team admin
 
 ## Local
 ```bash
@@ -33,4 +33,4 @@ npm run dev
 ```
 
 ## Railway
-Connected to `Dcid1218/Sales-Dialer-` main. Push deploys automatically.
+Push to `main` auto-deploys.
