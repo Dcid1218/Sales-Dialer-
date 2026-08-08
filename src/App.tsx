@@ -16,6 +16,7 @@ import Manage from './views/Manage.tsx';
 import Admin from './views/Admin.tsx';
 import Profile from './views/Profile.tsx';
 import Deals from './views/Deals.tsx';
+import Leads from './views/Leads.tsx';
 
 export type Store = {
   user: User;
@@ -28,7 +29,7 @@ export type Store = {
   say: (msg: string) => void;
 };
 
-type Tab = 'today' | 'schedule' | 'stats' | 'deals' | 'board' | 'manage' | 'admin' | 'profile';
+type Tab = 'today' | 'schedule' | 'stats' | 'deals' | 'leads' | 'board' | 'manage' | 'admin' | 'profile';
 type Gate = 'checking' | 'welcome' | 'onboard' | 'open';
 
 const DEFAULT_SETTINGS: Settings = {
@@ -43,6 +44,7 @@ export default function App() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [tab, setTab] = useState<Tab>('today');
   const [toast, setToast] = useState<string | null>(null);
+  const [navOpen, setNavOpen] = useState(false);
   const toastTimer = useRef<number>();
 
   const say = useCallback((msg: string) => {
@@ -108,20 +110,21 @@ export default function App() {
   }, [days]);
 
   const tabs = useMemo(() => {
-    const base: { id: Tab; label: string; short: string }[] = [
-          { id: 'today', label: 'Today', short: 'Today' },
-          { id: 'schedule', label: 'Schedule', short: 'Plan' },
-          { id: 'stats', label: 'Stats', short: 'Stats' },
-          { id: 'deals', label: 'Deals', short: 'Deals' },
-          { id: 'board', label: 'Board', short: 'Board' },
-          { id: 'profile', label: 'Profile', short: 'You' },
-        ];
-        if (user?.role === 'manager' || user?.role === 'admin') {
-          base.splice(5, 0, { id: 'manage', label: 'Team', short: 'Team' });
-        }
-        if (user?.role === 'admin') {
-          base.splice(6, 0, { id: 'admin', label: 'Admin', short: 'Admin' });
-        }
+    const base: { id: Tab; label: string }[] = [
+      { id: 'today', label: 'Today' },
+      { id: 'leads', label: 'Leads' },
+      { id: 'schedule', label: 'Plan' },
+      { id: 'stats', label: 'Stats' },
+      { id: 'deals', label: 'Deals' },
+      { id: 'board', label: 'Board' },
+      { id: 'profile', label: 'You' },
+    ];
+    if (user?.role === 'manager' || user?.role === 'admin') {
+      base.splice(6, 0, { id: 'manage', label: 'Team' });
+    }
+    if (user?.role === 'admin') {
+      base.splice(7, 0, { id: 'admin', label: 'Admin' });
+    }
     return base;
   }, [user?.role]);
 
@@ -145,15 +148,57 @@ export default function App() {
   const store: Store = { user, setUser, days, settings, reload, bump, savePremium, say };
   const brand = user.team_brand || PLATFORM_BRAND;
   const Screen = {
-      today: Today, schedule: Schedule, stats: Stats, deals: Deals, board: Board,
-      manage: Manage, admin: Admin, profile: Profile,
-    }[tab];
+    today: Today, schedule: Schedule, stats: Stats, deals: Deals, leads: Leads, board: Board,
+    manage: Manage, admin: Admin, profile: Profile,
+  }[tab];
+
+  const go = (id: Tab) => {
+    setTab(id);
+    setNavOpen(false);
+  };
 
   return (
     <>
       <div className="bgfx golf"><div className="blob g" /><div className="blob e" /></div>
-      <div className="app">
+
+      <div className={`nav-scrim ${navOpen ? 'open' : ''}`} onClick={() => setNavOpen(false)} aria-hidden={!navOpen} />
+      <aside className={`sidenav ${navOpen ? 'open' : ''}`} aria-label="Main navigation">
+        <div className="sidenav-head">
+          <BrandMark brand={brand} variant="header" />
+          <div className="logo-copy">
+            <div className="wm">{brand.appName || user.team_name || 'QuackedDialer'}</div>
+            <div className="tag">{brand.tagline || 'Sales Performance OS'}</div>
+          </div>
+          <button type="button" className="sidenav-close" onClick={() => setNavOpen(false)} aria-label="Close menu">×</button>
+        </div>
+        <nav className="sidenav-links">
+          {tabs.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              className={tab === t.id ? 'on' : ''}
+              onClick={() => go(t.id)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </nav>
+        <div className="sidenav-foot">
+          <span className="role-pill">{user.role}</span>
+        </div>
+      </aside>
+
+      <div className="app shell">
         <header className="topbar">
+          <button
+            type="button"
+            className="hamburger"
+            onClick={() => setNavOpen((o) => !o)}
+            aria-label="Open menu"
+            aria-expanded={navOpen}
+          >
+            <span /><span /><span />
+          </button>
           <div className="logo">
             <BrandMark brand={brand} variant="header" />
             <div className="logo-copy">
@@ -171,22 +216,6 @@ export default function App() {
         </main>
       </div>
 
-      <nav className="botnav" aria-label="Primary">
-        <div className={`botnav-inner cols-${Math.min(tabs.length, 7)}`}>
-          {tabs.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              className={tab === t.id ? 'on' : ''}
-              onClick={() => setTab(t.id)}
-              aria-current={tab === t.id ? 'page' : undefined}
-            >
-              <span className="nav-label">{t.label}</span>
-              <span className="nav-short">{t.short}</span>
-            </button>
-          ))}
-        </div>
-      </nav>
       {toast && <Toast text={toast} />}
     </>
   );
